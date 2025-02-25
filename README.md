@@ -403,3 +403,225 @@ func.print();
     console.log('클릭')
   }
   ```
+  ---
+## 클래스 만들 때 타입 지정  
+### 클래스요소에 타입 지정하기
+- 클래스는 객체를 복사하는 복사기계라고 할 수 있다. 
+- 클래스는 생성자함수와 필드, 메서드로 구성되어 있다.
+- 클래스 내부의 필드와 메서드는 클래스.prototype에 저장된다.
+- 타입스크립트에선 생성자함수 내부에 this.변수를 작성하기 위해   
+  필드에서 변수를 필드에 미리 정의해야한다. (타입도 마찬가지)
+  ```ts
+  class Person {
+    // 생성자함수 정의
+    constructor(name:string,age:number){
+      this.name = name;
+      this.age = age;
+    }
+    // this.name의 타입 지정, this.age 변수 선언
+    name: string;
+    age;
+    // 필드 정의
+    type = '사람' 
+    // 메서드 정의
+    getPerson(ending: string):string{
+      let introduce = `안녕하세요. 저는 ${this.name} 입니다. 저는 ${this.age}살 이며, 용기있는 ${this.type}입니다. ${ending}`
+      return introduce
+    }
+  }
+
+  let 지용 = new Person('전지용',32)
+  console.log(지용);
+  console.log(지용.name);
+  console.log(지용.age);
+  console.log(지용.type);
+  console.log(지용.getPerson('잘 부탁드립니다.'));
+  ```
+---
+## Object에 타입지정하려면 interface 를 써라.
+### interface 사용하기
+- interface 기본 형식 
+  ```ts
+  interface Square {
+    color :string;
+    width :number;
+  };
+
+  let 네모 :Square = { 
+    color: 'red',
+    width: 100
+  };
+  ```
+- interface의 장점은 extends도 가능함 (type alias도 & 기호를 사용해서 가능하긴 함)
+  ```ts
+  interface Square2 extends Square {
+    // color :string;
+    // width :number;
+    height :number;
+  };
+
+  // type alias에서도 extends 비슷하게 구현하기 (&로 type을 합치는것을 intersection 이라고함)
+  type Square = {
+    color :string,
+    width :number
+  };
+  
+  type Square2 = Square & { height :number }
+  ```
+- interface의 최대 장점은 타입이름 중복선언을 허용해준다. (덮어쓰기 가능)
+  ```ts
+  interface Square {
+    color :string;
+    width :number;
+  }
+
+  interface Square {
+    height :number;
+  }
+  ```
+---
+## narrowing 할 수 있는 방법 더 알아보기
+### 1. if ( 변수 && typeof 변수 === 'string')
+- 해석하면 변수가 존재하고, 변수의 타입이 string이면 true / 아니면 false
+  ```ts
+  function 함수(a: string | undefined) {
+    if (a && typeof a === "string") {  
+      console.log(a);
+    } 
+  }
+  ```
+### 2. if ('key' in object) 
+- 해석하면 object 안에 key 속성이 존재하면 true 아니면 false
+  ```ts
+  // type alias (타입변수)
+  type Name = { name :string }
+  type Age = { age :number }
+  type Ugly = { ugly :boolean }
+
+  // 함수
+  function User(user: Name|Age) {
+    if( 'name' in user ) {
+      return user.name
+    } else if ( 'age' in user ) {
+      return user.age
+    } else {
+      throw new Error('에러다')
+    }
+  }
+
+  const user1 :Name = { name : 'kim' }
+  const user2 :Age = { age : 32 }
+  const user3 :Ugly = { ugly : true }
+
+  console.log(User(user1));  // kim
+  console.log(User(user2));  // 32 
+  console.log(User(user3));  // Error: 에러다
+  ```
+### 3. if ( object instanceof Class )
+- 해석하면 object가 Class에 상속되어 있으면 true / 아니면 false
+  ```ts
+  let date = new Date();  // date는 현재시간
+  function 함수 (date:{}):void {
+    if(date instanceof Date) {
+      console.log(date)
+    } else {
+      throw new Error('에러다')
+    }
+  }
+
+  함수(date);
+  ```
+---
+## 함수에 사용하는 never 타입도 있다.
+### never type 조건 (쓸데는 없으니 가볍게 알고 지나치기, 그냥 void쓰지)
+- 조건1. return 값이 없어야함.
+- 조건2. 함수가 중단되거나(throw new Error) 무한루프(while) 되어야함.
+  ```ts
+  // return 값이 없고 함수가 중단
+  function neverFunc () {
+    throw new Error('neverFunc는 never type 함수다.')
+  }
+
+  // return 값이 없고 함수가 무한루프
+  function neverFunc () {
+    while(true) {
+
+    }
+  }
+  ```
+---
+## public, private 쓰는거 보니까 타입스크립트 귀여운편
+### 타입스크립트에서만 사용가능한 public, private
+- Class 내부에 public 키워드가 붙은 필드/메서드
+  - Class 내부와 extends Class, Instance 모두 호출/수정이 가능하다.
+- Class 내부에 private 키워드가 붙은 필드/메서드
+  - Class 내부에서만 호출/수정이 가능하다.
+  - extends Class 와 Instance에서 호출/수정이 불가능하다.
+- js에서도 private 대신 #을 속성옆에 붙히면 private속성이 된다.
+  ```ts
+  class User {
+    public name :string;
+    private city :string; 
+    constructor(name :string, city :string){ 
+      this.name = name
+      this.city = city;
+    }
+    public getCity() { return this.city; }
+  }
+
+  let user = new User('철수','서울');
+  user.name // 가능
+  user.city // 불가능
+  user.getCity() // 가능
+  ```
+### public, private 키워드의 또다른 기능
+- public, private를 생성자함수의 파라미터에 붙혀주면  
+  Class내부에 따로 파라미터를 정의해주지 않아도된다.
+  ```ts
+  //기존
+  class Person {
+    name;
+    constructor(name:string){
+      this.name = name;
+    }
+  }
+
+  // public,private 키워드를 생성자함수의 파라미터에 적용
+  class Person {
+    constructor(public name: string){
+      this.name = name
+    }
+  }
+  ```
+---
+## class에서 사용가능한 protected, static 키워드
+### 타입스크립트에서만 사용가능한 protected, static
+- Class 내부에 protected 키워드가 붙은 필드/메서드
+  - Class 내부와 extends Class에서 호출/수정이 가능하다.
+  - Instance에서 호출/수정이 불가능하다.
+- Class 내부에 static 키워드가 붙은 필드/메서드
+  - Class 자체에 속하며, Class.static필드/메서드명으로 어디서든 호출/수정이 가능하다.
+  ```ts
+  class User {
+    protected name :string;
+    static city :string;
+    constructor (name :string, city :string){
+      this.name = name;
+      User.city = city; 
+    }
+  }
+  
+  class User2 extends User {
+    getName() {
+      return this.name;
+    }  
+  } 
+  
+  let user = new User2('철수','서울')
+  
+  user.name // 불가능
+  user.getName() // 가능
+  user.city // 불가능
+  User.city // 가능
+  ```
+---
