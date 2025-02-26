@@ -625,3 +625,35 @@ func.print();
   User.city // 가능
   ```
 ---
+## 타입도 import export 해서 씁니다. & name space
+### 1. 타입 export , import 하기
+- js에서 export , import 하는 방식과 일치하다.
+```ts
+// a.ts
+export type Name = string | boolean;
+export type Age = (age:number) => number;
+
+// b.ts
+import { Name, Age } from './a'
+
+let 이름 :Name = '김'
+let 만나이 :Age = (age) => { return age - 1; }
+```
+
+### 2. 과거엔 namespace 키워드를 사용
+- 현재는 import, export가 있어서 사용하진 않지만, 옛날 문서 읽을 때 해석할 줄은 알아야 하니까 알아두자.
+- 더욱 과거에는 namespace키워드가 module 키워드였다고 한다.
+```ts
+// a.ts
+namespace MyNamespace {
+  export interface Person { name :string, age :number };
+  export type email = string
+}
+
+// b.ts 
+/// <reference path="./a.ts"/>  
+
+let 유저 :MyNamespace.Person = { name:'김', age:20 };
+let 이메일 :MyNamespace.email = 'kim@naver.com'
+```
+---
